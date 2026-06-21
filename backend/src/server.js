@@ -14,15 +14,24 @@ const PORT = process.env.PORT || 5001;
 const __dirname = path.resolve();
 
 // middleware
-if (process.env.NODE_ENV !== "production") {
-  app.use(
-    cors({
-      origin: (origin, callback) => {
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      const allowedOrigin = process.env.CORS_ORIGIN;
+      if (
+        !origin ||
+        /^http:\/\/localhost:\d+$/.test(origin) ||
+        (allowedOrigin && origin === allowedOrigin) ||
+        !allowedOrigin
+      ) {
         callback(null, true);
-      },
-    })
-  );
-}
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json()); // this middleware will parse JSON bodies: req.body
 app.use(rateLimiter);
 
